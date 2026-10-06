@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  portal:
+    image: isabella028491/agrovale-portal:1.0-26127995
+    ports:
+      - "8095:80"
+    networks:
+      - agrovale-net
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - agrovale-net
+    restart: unless-stopped
+
+  blog:
+    image: wordpress:6-apache
+    ports:
+      - "9095:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: ${MARIADB_DATABASE}
+      WORDPRESS_DB_USER: ${MARIADB_USER}
+      WORDPRESS_DB_PASSWORD: ${MARIADB_PASSWORD}
+    volumes:
+      - blog_data:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - agrovale-net
+    restart: unless-stopped
+
+networks:
+  agrovale-net:
+    driver: bridge
+
+volumes:
+  db_data:
+  blog_data:
